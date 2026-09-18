@@ -248,17 +248,29 @@ fs::path createUniquePath(const fs::path& destination)
 }
 
 bool isInsideOrganizerFolder(
-    const fs::path& file,
-    const fs::path& organizerFolder)
+    const fs::path &file,
+    const fs::path &organizerFolder)
 {
     try
     {
         fs::path fileAbsolute = fs::absolute(file);
         fs::path folderAbsolute = fs::absolute(organizerFolder);
 
-        return fileAbsolute.string().find(
-                   folderAbsolute.string() + fs::path::preferred_separator
-               ) == 0;
+        string filePath = fileAbsolute.lexically_normal().string();
+        string folderPath = folderAbsolute.lexically_normal().string();
+
+        if (filePath == folderPath)
+            return true;
+
+        if (filePath.length() <= folderPath.length())
+            return false;
+
+        return filePath.compare(
+                   0,
+                   folderPath.length(),
+                   folderPath) == 0 &&
+               (filePath[folderPath.length()] == '/' ||
+                filePath[folderPath.length()] == '\\');
     }
     catch (...)
     {
